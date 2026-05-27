@@ -3,73 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 Catálogo de Filmes</title>
+    <title>🎬 CineCatálogo - Filmes</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 Catálogo de Filmes</h1>
-        
-        <div class="form-container">
-            <h2 id="form-title">Adicionar Novo Filme</h2>
-            <form id="filme-form">
-                <input type="hidden" id="filme-id">
-                
-                <div class="form-group">
-                    <label for="titulo">Título:</label>
-                    <input type="text" id="titulo" required placeholder="Digite o título do filme">
-                </div>
-                
-                <div class="form-group">
-                    <label for="diretor">Diretor:</label>
-                    <input type="text" id="diretor" required placeholder="Nome do diretor">
-                </div>
-                
-                <div class="form-group">
-                    <label for="estudio">Estúdio:</label>
-                    <input type="text" id="estudio" required placeholder="Estúdio ou produtora">
-                </div>
-                
-                <div class="form-group">
-                    <label for="ano">Ano:</label>
-                    <input type="number" id="ano" required placeholder="Ano de lançamento">
-                </div>
-                
-                <div class="form-group">
-                    <label for="preco">Preço:</label>
-                    <input type="number" id="preco" step="0.01" required placeholder="0.00">
-                </div>
-                
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                    <button type="button" id="btn-cancelar" class="btn btn-secondary" style="display:none;">Cancelar</button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="table-container">
-            <h2>Filmes Cadastrados</h2>
-            <div class="search-bar">
-                <input type="text" id="search" placeholder="Pesquisar por título ou diretor...">
+    <!-- Header Cinema -->
+    <header class="cinema-header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">🎬</span>
+                <h1>CINE<span>CATÁLOGO</span></h1>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Diretor</th>
-                        <th>Estúdio</th>
-                        <th>Ano</th>
-                        <th>Preço</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="filmes-table-body">
-                </tbody>
-            </table>
-            <div id="no-data" style="display:none;">Nenhum filme cadastrado.</div>
+            <p class="subtitle">Sua Coleção de Filmes</p>
+        </div>
+        <div class="header-decoration"></div>
+    </header>
+
+    <div class="container">
+        <!-- Card do Formulário -->
+        <div class="cinema-card form-card">
+            <div class="card-header">
+                <h2 id="form-title">
+                    <span class="icon">🎥</span> 
+                    Adicionar Novo Filme
+                </h2>
+            </div>
+            <div class="card-body">
+                <form id="filme-form">
+                    <input type="hidden" id="filme-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="titulo">
+                                <span class="label-icon">🎯</span> Título
+                            </label>
+                            <input type="text" id="titulo" required 
+                                   placeholder="Ex: O Poderoso Chefão">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="diretor">
+                                <span class="label-icon">👤</span> Diretor
+                            </label>
+                            <input type="text" id="diretor" required 
+                                   placeholder="Ex: Francis Ford Coppola">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estudio">
+                                <span class="label-icon">🏢</span> Estúdio
+                            </label>
+                            <input type="text" id="estudio" 
+                                   placeholder="Ex: Paramount Pictures">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ano">
+                                <span class="label-icon">📅</span> Ano
+                            </label>
+                            <input type="number" id="ano" 
+                                   placeholder="Ex: 1972">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preco">
+                                <span class="label-icon">💵</span> Preço
+                            </label>
+                            <input type="number" id="preco" step="0.01" 
+                                   placeholder="R$ 0,00">
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <span>💾</span> Salvar Filme
+                        </button>
+                        <button type="button" id="btn-cancelar" class="btn btn-outline" style="display:none;">
+                            <span>❌</span> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Card da Tabela -->
+        <div class="cinema-card table-card">
+            <div class="card-header">
+                <h2>
+                    <span class="icon">🍿</span> 
+                    Filmes Cadastrados
+                </h2>
+                <div class="movie-count" id="movie-count">
+                    <span class="count-number">0</span> filmes
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search" 
+                           placeholder="Pesquisar por título ou diretor...">
+                </div>
+                
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Diretor</th>
+                                <th>Estúdio</th>
+                                <th>Ano</th>
+                                <th>Preço</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filmes-table-body">
+                            <!-- Dados via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="loading" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Carregando filmes...</p>
+                </div>
+                
+                <div id="no-data" class="empty-state">
+                    <div class="empty-icon">🎬</div>
+                    <h3>Nenhum filme cadastrado</h3>
+                    <p>Adicione o primeiro filme à sua coleção!</p>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="cinema-footer">
+        <p>© 2024 CineCatálogo - Todos os direitos reservados</p>
+        <div class="footer-decoration">
+            <span>🎬</span>
+            <span>🎥</span>
+            <span>🍿</span>
+            <span>🎞️</span>
+        </div>
+    </footer>
 
     <script src="js/app.js"></script>
 </body>
