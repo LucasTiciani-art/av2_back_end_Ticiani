@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livraria - Gerenciamento</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Gerenciamento de Livros</h1>
+        
+        <!-- Formulário -->
+        <div class="form-container">
+            <h2 id="form-title">Adicionar Novo Livro</h2>
+            <form id="livro-form">
+                <input type="hidden" id="livro-id">
+                
+                <div class="form-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" required placeholder="Digite o título">
+                </div>
+                
+                <div class="form-group">
+                    <label for="autor">Autor:</label>
+                    <input type="text" id="autor" required placeholder="Digite o autor">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editora">Editora:</label>
+                    <input type="text" id="editora" required placeholder="Digite a editora">
+                </div>
+                
+                <div class="form-group">
+                    <label for="preco">Preço:</label>
+                    <input type="number" id="preco" step="0.01" required placeholder="0.00">
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" id="btn-cancelar" class="btn btn-secondary" style="display:none;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Tabela -->
+        <div class="table-container">
+            <h2>Livros Cadastrados</h2>
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Pesquisar por título ou autor...">
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Editora</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="livros-table-body">
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+            <div id="no-data" style="display:none;">Nenhum livro cadastrado.</div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
