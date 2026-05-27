@@ -1,228 +1,145 @@
-const express = require('express');
-const app = express();
-app.use(express.json());
-app.set('json spaces', 2);
+const API_URL = 'http://localhost:8080/seu-projeto/filmeserv';
 
-// ============ ARRAYS EM MEMÓRIA ============
-let filmes = [
-    { id: 1, titulo: "Matrix", genero: "Ficção Científica", ano_lancamento: 1999 },
-    { id: 2, titulo: "O Poderoso Chefão", genero: "Drama", ano_lancamento: 1972 },
-    { id: 3, titulo: "Parasita", genero: "Suspense", ano_lancamento: 2019 }
-];
+const filmeForm = document.getElementById('filme-form');
+const filmeId = document.getElementById('filme-id');
+const titulo = document.getElementById('titulo');
+const diretor = document.getElementById('diretor');
+const estudio = document.getElementById('estudio');
+const ano = document.getElementById('ano');
+const preco = document.getElementById('preco');
+const btnCancelar = document.getElementById('btn-cancelar');
+const formTitle = document.getElementById('form-title');
+const searchInput = document.getElementById('search');
+const tableBody = document.getElementById('filmes-table-body');
+const noData = document.getElementById('no-data');
 
-let usuarios = [
-    { id: 1, nome: "João Silva", email: "joao@email.com", plano: "Premium" },
-    { id: 2, nome: "Maria Santos", email: "maria@email.com", plano: "Básico" },
-    { id: 3, nome: "Pedro Costa", email: "pedro@email.com", plano: "Premium" }
-];
+document.addEventListener('DOMContentLoaded', carregarFilmes);
+filmeForm.addEventListener('submit', salvarFilme);
+btnCancelar.addEventListener('click', resetForm);
+searchInput.addEventListener('input', filtrarFilmes);
 
-let favoritos = [
-    { id: 1, id_usuario: 1, id_filme: 1 },
-    { id: 2, id_usuario: 1, id_filme: 2 },
-    { id: 3, id_usuario: 2, id_filme: 3 }
-];
+async function carregarFilmes() {
+    try {
+        const response = await fetch(`${API_URL}?acao=listar`);
+        const filmes = await response.json();
+        exibirFilmes(filmes);
+    } catch (error) {
+        mostrarToast('Erro ao carregar filmes: ' + error.message, 'error');
+    }
+}
 
-// Contadores para IDs
-let nextFilmeId = 4;
-let nextUsuarioId = 4;
-let nextFavoritoId = 4;
-
-// ============ GESTÃO DE FILMES ============
-
-// GET /filmes - Listar todos os filmes
-app.get('/filmes', (req, res) => {
-    res.json(filmes);
-});
-
-// POST /filmes - Cadastrar novo filme
-app.post('/filmes', (req, res) => {
-    const { titulo, genero, ano_lancamento } = req.body;
+function exibirFilmes(filmes) {
+    tableBody.innerHTML = '';
     
-    // Validação simples
-    if (!titulo || !genero || !ano_lancamento) {
-        return res.status(400).json({ erro: "Dados incompletos. Necessário: titulo, genero, ano_lancamento" });
+    if (filmes.length === 0) {
+        noData.style.display = 'block';
+        return;
     }
     
-    const novoFilme = {
-        id: nextFilmeId++,
-        titulo,
-        genero,
-        ano_lancamento
+    noData.style.display = 'none';
+    
+    filmes.forEach(filme => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${filme.id}</td>
+            <td>${filme.titulo}</td>
+            <td>${filme.diretor}</td>
+            <td>${filme.estudio}</td>
+            <td>${filme.ano}</td>
+            <td>R$ ${parseFloat(filme.preco).toFixed(2)}</td>
+            <td class="actions">
+                <button class="btn-edit" onclick="editarFilme(${filme.id})">Editar</button>
+                <button class="btn-danger" onclick="deletarFilme(${filme.id})">Excluir</button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+async function salvarFilme(e) {
+    e.preventDefault();
+    
+    const filme = {
+        titulo: titulo.value,
+        diretor: diretor.value,
+        estudio: estudio.value,
+        ano: parseInt(ano.value),
+        preco: parseFloat(preco.value)
     };
     
-    filmes.push(novoFilme);
-    res.status(201).json(novoFilme);
-});
-
-// DELETE /filmes/:id - Remover filme
-app.delete('/filmes/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const index = filmes.findIndex(f => f.id === id);
+    const id = filmeId.value;
+    const url = id ? `${API_URL}?acao=atualizar&id=${id}` : `${API_URL}?acao=criar`;
+    const method = id ? 'PUT' : 'POST';
     
-    if (index === -1) {
-        return res.status(404).json({ erro: "Filme não encontrado" });
-    }
-    
-    // Remove também dos favoritos
-    favoritos = favoritos.filter(fav => fav.id_filme !== id);
-    
-    filmes.splice(index, 1);
-    res.json({ mensagem: "Filme removido com sucesso" });
-});
-
-// ============ GESTÃO DE USUÁRIOS ============
-
-// GET /usuarios - Listar todos os usuários
-app.get('/usuarios', (req, res) => {
-    res.json(usuarios);
-});
-
-// POST /usuarios - Cadastrar novo usuário
-app.post('/usuarios', (req, res) => {
-    const { nome, email, plano } = req.body;
-    
-    // Validação simples
-    if (!nome || !email || !plano) {
-        return res.status(400).json({ erro: "Dados incompletos. Necessário: nome, email, plano" });
-    }
-    
-    // Validação de plano
-    if (plano !== 'Básico' && plano !== 'Premium') {
-        return res.status(400).json({ erro: "Plano inválido. Use 'Básico' ou 'Premium'" });
-    }
-    
-    const novoUsuario = {
-        id: nextUsuarioId++,
-        nome,
-        email,
-        plano
-    };
-    
-    usuarios.push(novoUsuario);
-    res.status(201).json(novoUsuario);
-});
-
-// PUT /usuarios/:id - Atualizar usuário
-app.put('/usuarios/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const { nome, email, plano } = req.body;
-    const usuario = usuarios.find(u => u.id === id);
-    
-    if (!usuario) {
-        return res.status(404).json({ erro: "Usuário não encontrado" });
-    }
-    
-    // Validação de plano
-    if (plano && plano !== 'Básico' && plano !== 'Premium') {
-        return res.status(400).json({ erro: "Plano inválido. Use 'Básico' ou 'Premium'" });
-    }
-    
-    // Atualiza apenas campos fornecidos
-    if (nome) usuario.nome = nome;
-    if (email) usuario.email = email;
-    if (plano) usuario.plano = plano;
-    
-    res.json(usuario);
-});
-
-// ============ SISTEMA DE FAVORITOS ============
-
-// POST /favoritos - Adicionar favorito
-app.post('/favoritos', (req, res) => {
-    const { id_usuario, id_filme } = req.body;
-    
-    if (!id_usuario || !id_filme) {
-        return res.status(400).json({ erro: "Dados incompletos. Necessário: id_usuario, id_filme" });
-    }
-    
-    // Verifica se usuário existe
-    const usuarioExiste = usuarios.some(u => u.id === id_usuario);
-    if (!usuarioExiste) {
-        return res.status(404).json({ erro: "Usuário não encontrado" });
-    }
-    
-    // Verifica se filme existe
-    const filmeExiste = filmes.some(f => f.id === id_filme);
-    if (!filmeExiste) {
-        return res.status(404).json({ erro: "Filme não encontrado" });
-    }
-    
-    // Verifica se já existe favorito (evita duplicatas)
-    const favoritoExistente = favoritos.find(f => 
-        f.id_usuario === id_usuario && f.id_filme === id_filme
-    );
-    
-    if (favoritoExistente) {
-        return res.status(409).json({ erro: "Este filme já está nos favoritos deste usuário" });
-    }
-    
-    const novoFavorito = {
-        id: nextFavoritoId++,
-        id_usuario,
-        id_filme
-    };
-    
-    favoritos.push(novoFavorito);
-    res.status(201).json(novoFavorito);
-});
-
-// GET /favoritos - Listar todos os favoritos
-app.get('/favoritos', (req, res) => {
-    // Enriquece os dados com informações de usuário e filme
-    const favoritosEnriquecidos = favoritos.map(fav => {
-        const usuario = usuarios.find(u => u.id === fav.id_usuario);
-        const filme = filmes.find(f => f.id === fav.id_filme);
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(filme)
+        });
         
-        return {
-            id: fav.id,
-            usuario: usuario ? { id: usuario.id, nome: usuario.nome } : null,
-            filme: filme ? { id: filme.id, titulo: filme.titulo } : null
-        };
-    });
-    
-    res.json(favoritosEnriquecidos);
-});
-
-// GET /favoritos/usuario/:id_usuario - Listar favoritos de um usuário
-app.get('/favoritos/usuario/:id_usuario', (req, res) => {
-    const id_usuario = parseInt(req.params.id_usuario);
-    
-    // Verifica se usuário existe
-    const usuarioExiste = usuarios.some(u => u.id === id_usuario);
-    if (!usuarioExiste) {
-        return res.status(404).json({ erro: "Usuário não encontrado" });
-    }
-    
-    // Filtra favoritos do usuário
-    const favoritosUsuario = favoritos
-        .filter(fav => fav.id_usuario === id_usuario)
-        .map(fav => {
-            const filme = filmes.find(f => f.id === fav.id_filme);
-            return filme || null;
-        })
-        .filter(filme => filme !== null); // Remove filmes que não existem mais
-    
-    res.json({
-        usuario: usuarios.find(u => u.id === id_usuario),
-        filmes_favoritos: favoritosUsuario
-    });
-});
-
-// ============ INICIALIZAÇÃO ============
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 CineStream API rodando em http://localhost:${PORT}`);
-    console.log('📁 Arrays em memória inicializados com dados de exemplo');
-});
-
-app.get('/', (req, res) => {
-    res.json({
-        mensagem: "Bem-vindo à CineStream API!",
-        rotas_disponiveis: {
-            filmes: "/filmes",
-            usuarios: "/usuarios",
-            favoritos: "/favoritos",
-            favoritos_usuario: "/favoritos/usuario/:id"
+        if (response.ok) {
+            mostrarToast(id ? '🎬 Filme atualizado!' : '🎬 Filme adicionado!', 'success');
+            resetForm();
+            carregarFilmes();
         }
+    } catch (error) {
+        mostrarToast('Erro: ' + error.message, 'error');
+    }
+}
+
+async function editarFilme(id) {
+    try {
+        const response = await fetch(`${API_URL}?acao=buscar&id=${id}`);
+        const filme = await response.json();
+        
+        filmeId.value = filme.id;
+        titulo.value = filme.titulo;
+        diretor.value = filme.diretor;
+        estudio.value = filme.estudio;
+        ano.value = filme.ano;
+        preco.value = filme.preco;
+        
+        formTitle.textContent = 'Editar Filme';
+        btnCancelar.style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        mostrarToast('Erro ao carregar filme', 'error');
+    }
+}
+
+async function deletarFilme(id) {
+    if (!confirm('Excluir este filme permanentemente?')) return;
+    
+    try {
+        await fetch(`${API_URL}?acao=deletar&id=${id}`, { method: 'DELETE' });
+        mostrarToast('Filme excluído!', 'success');
+        carregarFilmes();
+    } catch (error) {
+        mostrarToast('Erro ao excluir', 'error');
+    }
+}
+
+function resetForm() {
+    filmeForm.reset();
+    filmeId.value = '';
+    formTitle.textContent = 'Adicionar Novo Filme';
+    btnCancelar.style.display = 'none';
+}
+
+function filtrarFilmes() {
+    const termo = searchInput.value.toLowerCase();
+    document.querySelectorAll('#filmes-table-body tr').forEach(linha => {
+        const titulo = linha.cells[1].textContent.toLowerCase();
+        const diretor = linha.cells[2].textContent.toLowerCase();
+        linha.style.display = (titulo.includes(termo) || diretor.includes(termo)) ? '' : 'none';
     });
-});
+}
+
+function mostrarToast(mensagem, tipo) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${tipo}`;
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
