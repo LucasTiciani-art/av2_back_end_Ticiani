@@ -1,5 +1,5 @@
 // Configuração da API
-const API_URL = 'http://localhost:3000/api/filmes';
+const API_URL = 'http://localhost:3000';
 
 // Elementos do DOM
 const filmeForm = document.getElementById('filme-form');
